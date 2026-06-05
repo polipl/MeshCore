@@ -56,20 +56,21 @@ static bool _ota_wifi_configured = false;
 static void _ensure_wifi_configured() {
   if (_ota_wifi_configured) return;
   _ota_wifi_configured = true;
-
-#if defined(WIFI_NETWORKS)
-  _ota_wifi.addNetworksFromString(WIFI_NETWORKS);
-#else
-  // Fall back to single SSID/password pair if defined
-  #if defined(WIFI_SSID) && defined(WIFI_PWD)
-    _ota_wifi.addNetwork(WIFI_SSID, WIFI_PWD);
-  #endif
-  #if defined(WIFI_SSID_2) && defined(WIFI_PWD_2)
-    _ota_wifi.addNetwork(WIFI_SSID_2, WIFI_PWD_2);
-  #endif
-  #if defined(WIFI_SSID_3) && defined(WIFI_PWD_3)
-    _ota_wifi.addNetwork(WIFI_SSID_3, WIFI_PWD_3);
-  #endif
+  // Configure via WIFI_SSID_1/WIFI_PWD_1 … WIFI_SSID_5/WIFI_PWD_5 in platformio.local.ini
+#if defined(WIFI_SSID_1) && defined(WIFI_PWD_1)
+  _ota_wifi.addNetwork(WIFI_SSID_1, WIFI_PWD_1);
+#endif
+#if defined(WIFI_SSID_2) && defined(WIFI_PWD_2)
+  _ota_wifi.addNetwork(WIFI_SSID_2, WIFI_PWD_2);
+#endif
+#if defined(WIFI_SSID_3) && defined(WIFI_PWD_3)
+  _ota_wifi.addNetwork(WIFI_SSID_3, WIFI_PWD_3);
+#endif
+#if defined(WIFI_SSID_4) && defined(WIFI_PWD_4)
+  _ota_wifi.addNetwork(WIFI_SSID_4, WIFI_PWD_4);
+#endif
+#if defined(WIFI_SSID_5) && defined(WIFI_PWD_5)
+  _ota_wifi.addNetwork(WIFI_SSID_5, WIFI_PWD_5);
 #endif
 }
 

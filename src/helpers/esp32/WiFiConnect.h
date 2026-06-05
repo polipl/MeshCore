@@ -20,25 +20,6 @@ public:
     _multi.addAP(ssid, password);
   }
 
-  // Parse a semicolon-delimited list "ssid1:pwd1;ssid2:pwd2;..."
-  void addNetworksFromString(const char* networks_str) {
-    char buf[256];
-    strncpy(buf, networks_str, sizeof(buf) - 1);
-    buf[sizeof(buf) - 1] = '\0';
-
-    char* entry = strtok(buf, ";");
-    while (entry != nullptr) {
-      char* colon = strchr(entry, ':');
-      if (colon != nullptr) {
-        *colon = '\0';
-        addNetwork(entry, colon + 1);
-      } else {
-        addNetwork(entry, "");  // open network
-      }
-      entry = strtok(nullptr, ";");
-    }
-  }
-
   // Connect to the best available network. Returns true on success.
   bool begin(uint32_t timeout_ms = WIFI_CONNECT_TIMEOUT_MS) {
     if (_started) return _connected;
