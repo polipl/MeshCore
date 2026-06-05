@@ -126,6 +126,8 @@ public:
   }
 
   bool startOTAUpdate(const char* id, char reply[]) override;
+  bool startInternetOTA(const char* firmware_version, char reply[]) override;
+  bool checkInternetOTA(const char* firmware_version, char reply[]) override;
 
   void setInhibitSleep(bool inhibit) {
     inhibit_sleep = inhibit;

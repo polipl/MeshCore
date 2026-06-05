@@ -238,6 +238,16 @@ void CommonCLI::handleCommand(uint32_t sender_timestamp, char* command, char* re
       if (!_board->startOTAUpdate(_prefs->node_name, reply)) {
         strcpy(reply, "Error");
       }
+    } else if (strcmp(command, "check cloud ota") == 0) {
+      if (!_board->checkInternetOTA(_callbacks->getFirmwareVer(), reply)) {
+        // reply already set by checkInternetOTA
+      }
+    } else if (strcmp(command, "start cloud ota") == 0) {
+      strcpy(reply, "Starting cloud OTA...");
+      if (!_board->startInternetOTA(_callbacks->getFirmwareVer(), reply)) {
+        // reply already set by startInternetOTA on error
+      }
+      // on success, board reboots — this line is never reached
     } else if (memcmp(command, "clock", 5) == 0) {
       uint32_t now = getRTCClock()->getCurrentTime();
       DateTime dt = DateTime(now);
