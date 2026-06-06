@@ -17,7 +17,9 @@ class AutoDiscoverRTCClock : public mesh::RTCClock {
   void syncSystemClock();
 public:
   AutoDiscoverRTCClock(mesh::RTCClock& fallback)
-    : _fallback(&fallback), _has_hw_rtc(false), _last_sync_ms(0) { }
+    : _fallback(&fallback), _has_hw_rtc(false), _last_sync_ms(0), _source_name("internal") { }
+
+  const char* getSourceName() const override { return _source_name; }
 
   void begin(TwoWire& wire);
   uint32_t getCurrentTime() override;

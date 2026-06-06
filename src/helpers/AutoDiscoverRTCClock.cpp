@@ -63,6 +63,11 @@ void AutoDiscoverRTCClock::begin(TwoWire& wire) {
     MESH_DEBUG_PRINTLN("RX8130CE: Initialized");
   }
 
+  if (ds3231_success)       _source_name = "DS3231";
+  else if (rv3028_success)  _source_name = "RV3028";
+  else if (rtc_8563_success) _source_name = "PCF8563";
+  else if (rtc_8130_success) _source_name = "RX8130CE";
+
   _has_hw_rtc = ds3231_success || rv3028_success || rtc_8563_success || rtc_8130_success;
   if (_has_hw_rtc) {
     syncSystemClock();
@@ -70,7 +75,7 @@ void AutoDiscoverRTCClock::begin(TwoWire& wire) {
   }
 }
 
-uint32_t AutoDiscoverRTCClock::getCurrentTime() {
+uint32_t AutoDiscoverRTCClock::getCurrentTime() {x  
   if (ds3231_success) {
     return rtc_3231.now().unixtime();
   }
