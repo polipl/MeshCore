@@ -20,6 +20,13 @@
   #define BOARD_ID "unknown"
 #endif
 
+// OTA download token — must match the token configured in nginx.conf on the server.
+// Set via -D OTA_TOKEN='"token"' in platformio.local.ini (gitignored, never committed).
+// If empty, requests are sent without a token (server will reject with 401).
+#ifndef OTA_TOKEN
+  #define OTA_TOKEN ""
+#endif
+
 struct OTAManifest {
   char version[32];   // e.g. "v1.15.1"
   char url[256];      // full URL to .bin
@@ -77,7 +84,11 @@ public:
     }
 
     char url[320];
-    snprintf(url, sizeof(url), "%s/%s/manifest.json", OTA_BASE_URL, BOARD_ID);
+    if (strlen(OTA_TOKEN) > 0) {
+      snprintf(url, sizeof(url), "%s/%s/manifest.json?token=%s", OTA_BASE_URL, BOARD_ID, OTA_TOKEN);
+    } else {
+      snprintf(url, sizeof(url), "%s/%s/manifest.json", OTA_BASE_URL, BOARD_ID);
+    }
 
     WiFiClientSecure tls;
     tls.setInsecure();  // skip cert validation — known server, firmware hash verified by ESP-IDF
@@ -138,7 +149,15 @@ public:
 
     httpUpdate.rebootOnUpdate(false);  // we reboot ourselves after logging
 
-    t_httpUpdate_return ret = httpUpdate.update(tls, manifest.url);
+    char fw_url[320];
+    if (strlen(OTA_TOKEN) > 0) {
+      snprintf(fw_url, sizeof(fw_url), "%s?token=%s", manifest.url, OTA_TOKEN);
+    } else {
+      strncpy(fw_url, manifest.url, sizeof(fw_url) - 1);
+      fw_url[sizeof(fw_url) - 1] = '\0';
+    }
+
+    t_httpUpdate_return ret = httpUpdate.update(tls, fw_url);
 
     switch (ret) {
       case HTTP_UPDATE_FAILED:

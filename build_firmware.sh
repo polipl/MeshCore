@@ -163,7 +163,7 @@ write_local_ini() {
     # Preserve WIFI_SSID_N / WIFI_PWD_N lines from existing file
     local wifi_lines=""
     if [[ -f "$LOCAL_INI" ]]; then
-        wifi_lines=$(grep -E "^\s+-D WIFI_(SSID|PWD)_[0-9]" "$LOCAL_INI" || true)
+        wifi_lines=$(grep -E "^\s+-D (WIFI_(SSID|PWD)_[0-9]+|OTA_TOKEN)" "$LOCAL_INI" || true)
     fi
 
     {
@@ -257,7 +257,7 @@ cleanup_ini() {
         return
     fi
     # Never remove if WiFi credentials are present
-    if [[ -f "$LOCAL_INI" ]] && grep -qE "WIFI_(SSID|PWD)_[0-9]" "$LOCAL_INI" 2>/dev/null; then
+    if [[ -f "$LOCAL_INI" ]] && grep -qE "WIFI_(SSID|PWD)_[0-9]+|OTA_TOKEN" "$LOCAL_INI" 2>/dev/null; then
         dim "  platformio.local.ini kept (contains WiFi credentials)"
         return
     fi
