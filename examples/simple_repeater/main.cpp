@@ -154,6 +154,18 @@ void loop() {
 #endif
   rtc_clock.tick();
 
+#if defined(WIFI_INTERNET_OTA)
+  {
+    static uint32_t _next_ota_ms = 5UL * 60 * 1000;  // first check 5 min after boot
+    if (millis() >= _next_ota_ms) {
+      _next_ota_ms = millis() + 15UL * 60 * 1000;    // reschedule before check (avoid re-entry on slow WiFi)
+      char ota_reply[160];
+      board.startInternetOTA(FIRMWARE_VERSION, ota_reply);
+      Serial.printf("[OTA] %s\n", ota_reply);
+    }
+  }
+#endif
+
   if (the_mesh.getNodePrefs()->powersaving_enabled && !the_mesh.hasPendingWork()) {
     #if defined(NRF52_PLATFORM)
     board.sleep(1800); // nrf ignores seconds param, sleeps whenever possible
