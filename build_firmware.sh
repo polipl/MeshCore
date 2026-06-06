@@ -239,9 +239,8 @@ deploy_board() {
     fi
 
     if [[ ! -d "$dest_dir" ]]; then
-        err "  Deploy dir missing: ${dest_dir}"
-        err "  Create it manually or run: mkdir -p ${dest_dir}"
-        return 1
+        mkdir -p "$dest_dir"
+        ok "  Created: ${dest_dir}"
     fi
 
     cp "$bin_src" "$bin_dst"
