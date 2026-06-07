@@ -176,9 +176,11 @@ write_local_ini() {
     local build_date; build_date=$(date "+%d %b %Y")
 
     # Preserve WIFI_SSID_N / WIFI_PWD_N lines from existing file
-    local wifi_lines=""
+    local wifi_lines="" primary_ssid="" primary_pwd=""
     if [[ -f "$LOCAL_INI" ]]; then
         wifi_lines=$(grep -E "^\s+-D (WIFI_(SSID|PWD)_[0-9]+|OTA_TOKEN)" "$LOCAL_INI" || true)
+        primary_ssid=$(grep -oE "WIFI_SSID_1='\"[^\"]*\"'" "$LOCAL_INI" | head -1 | sed -E "s/WIFI_SSID_1=//")
+        primary_pwd=$(grep -oE "WIFI_PWD_1='\"[^\"]*\"'" "$LOCAL_INI" | head -1 | sed -E "s/WIFI_PWD_1=//")
     fi
 
     {
@@ -194,6 +196,22 @@ write_local_ini() {
             printf ';   -D WIFI_SSID_1='"'"'"YourSSID"'"'"'\n'
             printf ';   -D WIFI_PWD_1='"'"'"YourPassword"'"'"'\n'
         fi
+        printf '\n; Applied to every environment via each board base section'"'"'s build_flags.\n'
+        printf '[poli_debug]\nbuild_flags =\n'
+        printf '  -D MESH_PACKET_LOGGING=1\n'
+        printf '  -D MESH_DEBUG=1\n'
+        printf '\n; Single-network WiFi creds for *_wifi companion envs — mirrors the primary\n'
+        printf '; network (WIFI_SSID_1/WIFI_PWD_1) so the always-on app TCP bridge and the\n'
+        printf '; cloud OTA check (companion_radio/main.cpp) reuse the same WiFi link.\n'
+        printf '[poli_wifi]\nbuild_flags =\n'
+        if [[ -n "$primary_ssid" && -n "$primary_pwd" ]]; then
+            printf "  -D WIFI_SSID=%s\n" "$primary_ssid"
+            printf "  -D WIFI_PWD=%s\n" "$primary_pwd"
+        else
+            printf '; No WIFI_SSID_1/WIFI_PWD_1 found — *_wifi envs need WIFI_SSID/WIFI_PWD:\n'
+            printf ';   -D WIFI_SSID_1='"'"'"YourSSID"'"'"'\n'
+            printf ';   -D WIFI_PWD_1='"'"'"YourPassword"'"'"'\n'
+        fi
     } > "$LOCAL_INI"
 
     ok "platformio.local.ini → ${version} / ${build_date}"
@@ -201,6 +219,11 @@ write_local_ini() {
         ok "  WiFi credentials preserved"
     else
         warn "  No WiFi credentials — add WIFI_SSID_N/WIFI_PWD_N to platformio.local.ini"
+    fi
+    if [[ -n "$primary_ssid" && -n "$primary_pwd" ]]; then
+        ok "  *_wifi envs → WIFI_SSID/WIFI_PWD mirrored from WIFI_SSID_1/WIFI_PWD_1"
+    else
+        warn "  *_wifi envs will fail to build — set WIFI_SSID_1/WIFI_PWD_1 in platformio.local.ini"
     fi
 }
 
